@@ -43,6 +43,8 @@ instance HasDecoder ElmConstructor where
   render (RecordConstructor name value) = do
     dv <- render value
     return $ "decode" <+> stext name <$$> indent 4 dv
+  render (MultipleConstructors constructors) =
+    mintercalate (line <> "|" <> space) <$> sequence (render <$> constructors)
 
 instance HasDecoder ElmValue where
   render (ElmRef name) = pure $ "decode" <> stext name
@@ -55,6 +57,8 @@ instance HasDecoder ElmValue where
     fieldModifier <- asks fieldLabelModifier
     dv <- render value
     return $ "|> required" <+> dquotes (stext (fieldModifier name)) <+> dv
+  render ElmEmpty = do
+    return $ stext ""
 
 instance HasDecoderRef ElmPrimitive where
   renderRef (EList (ElmPrimitive EChar)) = pure "string"
